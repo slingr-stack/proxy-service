@@ -38,9 +38,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Endpoint used as proxy to endpoints on the developer environment
+ * Service used as proxy to services on the developer environment
  *
- * Created by lefunes on 17/05/17.
+ * Created by agreggio on 23/10/23.
  */
 @SlingrService(name = "proxy")
 public class ProxyService extends Service {
@@ -49,9 +49,9 @@ public class ProxyService extends Service {
     private static final String DATA_STORE_NAME = "__ds_name__";
     private static final String DATA_STORE_NEW_ID = "__ds_id__";
     private static final String DATA_STORE_ID = "_id";
-    private static final String CONFIGURATION_HELP_URL_VALUE = "/endpoints_proxy.html#configuration";
+    private static final String CONFIGURATION_HELP_URL_VALUE = "/services_proxy.html#configuration";
 
-    // endpoint services uris
+    // Service services uris
     private static final String VAR_KEY = "key";
     private static final String VAR_DATA_STORE = "dataStore";
     private static final String VAR_DOCUMENT_ID = "documentId";
@@ -59,7 +59,6 @@ public class ProxyService extends Service {
     private static final String URL_CONFIGURATION =     ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_CONFIGURATION;
     private static final String URL_ASYNC_EVENT =       ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_ASYNC_EVENT;
     private static final String URL_SYNC_EVENT =        ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SYNC_EVENT;
- //   private static final String URL_CONFIG_SCRIPT =     ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_CONFIG_SCRIPT; //TODO revisar por que no esta en el sdk public static final String ES_URL_CONFIG_SCRIPT = "/services/scripts";
     private static final String URL_APP_LOG =           ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_APP_LOG;
     private static final String URL_FILE_UPLOAD =       ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_FILE_UPLOAD;
     private static final String URL_LOCK =              ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SERVICES_PREFIX+ApiUri.ES_PART_LOCK+"/{"+VAR_KEY+"}";
@@ -92,11 +91,11 @@ public class ProxyService extends Service {
 
     @Override
     public void serviceStarted() {
-        logger.info(String.format("Configured Proxy endpoint - Endpoint URI [%s], Endpoint Token [%s]", serviceUri, Strings.maskToken(serviceToken)));
+        logger.info(String.format("Configured Proxy Service - Service URI [%s], Service Token [%s]", serviceUri, Strings.maskToken(serviceToken)));
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Endpoints API
+    // Services API
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -113,16 +112,16 @@ public class ProxyService extends Service {
             }
             jsonRequest.set(Parameter.PARAMS, body);
 
-            final Json response = postJsonFromEndpoint(ApiUri.URL_FUNCTION, jsonRequest);
+            final Json response = postJsonFromService(ApiUri.URL_FUNCTION, jsonRequest);
 
             logger.info(String.format("Function response [%s] received - id [%s]", functionName, request.getFunctionId()));
             return response.contains(Parameter.DATA) ? response.json(Parameter.DATA) : Json.map();
         } catch (ServiceException ex){
-            appLogger.error(String.format("Exception when try to execute function on endpoint: %s", ex.toString()));
+            appLogger.error(String.format("Exception when try to execute function on Service: %s", ex));
             throw ex;
         } catch (Exception ex){
-            appLogger.error(String.format("Exception when try to execute function on endpoint: %s", ex.getMessage()));
-            throw ServiceException.permanent(ErrorCode.CLIENT, String.format("Exception when try to execute function on endpoint: %s", ex.getMessage()), ex);
+            appLogger.error(String.format("Exception when try to execute function on Service: %s", ex.getMessage()));
+            throw ServiceException.permanent(ErrorCode.CLIENT, String.format("Exception when try to execute function on Service: %s", ex.getMessage()), ex);
         }
     }
 
@@ -141,37 +140,37 @@ public class ProxyService extends Service {
                     .remove(Parameter.METADATA_JS)
                     .remove(Parameter.METADATA_LISTENERS);
 
-            // get configuration from the external endpoint
-            final Json endpointConfiguration = getJsonFromEndpoint(ApiUri.URL_CONFIGURATION);
-            if(endpointConfiguration != null) {
-                logger.info("Properties received from endpoint");
-                response.set(Parameter.METADATA_PER_USER, endpointConfiguration.is(Parameter.METADATA_PER_USER, false))
-                        .setIfNotNull(Parameter.METADATA_CONFIGURATION, endpointConfiguration.json(Parameter.METADATA_CONFIGURATION))
-                        .setIfNotNull(Parameter.METADATA_FUNCTIONS, endpointConfiguration.jsons(Parameter.METADATA_FUNCTIONS))
-                        .setIfNotNull(Parameter.METADATA_EVENTS, endpointConfiguration.jsons(Parameter.METADATA_EVENTS))
-                        .setIfNotEmpty(Parameter.METADATA_USER_CONF, endpointConfiguration.jsons(Parameter.METADATA_USER_CONF))
-                        .setIfNotEmpty(Parameter.METADATA_USER_CONF_BUTTONS, endpointConfiguration.json(Parameter.METADATA_USER_CONF_BUTTONS))
-                        .setIfNotEmpty(Parameter.METADATA_JS,endpointConfiguration.string(Parameter.METADATA_JS))
-                        .setIfNotEmpty(Parameter.METADATA_LISTENERS, endpointConfiguration.string(Parameter.METADATA_LISTENERS));
+            // get configuration from the external Service
+            final Json serviceConfiguration = getJsonFromService(ApiUri.URL_CONFIGURATION);
+            if(serviceConfiguration != null) {
+                logger.info("Properties received from Service");
+                response.set(Parameter.METADATA_PER_USER, serviceConfiguration.is(Parameter.METADATA_PER_USER, false))
+                        .setIfNotNull(Parameter.METADATA_CONFIGURATION, serviceConfiguration.json(Parameter.METADATA_CONFIGURATION))
+                        .setIfNotNull(Parameter.METADATA_FUNCTIONS, serviceConfiguration.jsons(Parameter.METADATA_FUNCTIONS))
+                        .setIfNotNull(Parameter.METADATA_EVENTS, serviceConfiguration.jsons(Parameter.METADATA_EVENTS))
+                        .setIfNotEmpty(Parameter.METADATA_USER_CONF, serviceConfiguration.jsons(Parameter.METADATA_USER_CONF))
+                        .setIfNotEmpty(Parameter.METADATA_USER_CONF_BUTTONS, serviceConfiguration.json(Parameter.METADATA_USER_CONF_BUTTONS))
+                        .setIfNotEmpty(Parameter.METADATA_JS,serviceConfiguration.string(Parameter.METADATA_JS))
+                        .setIfNotEmpty(Parameter.METADATA_LISTENERS, serviceConfiguration.string(Parameter.METADATA_LISTENERS));
             }
         } catch (ServiceException ex){
-            appLogger.error(String.format("Exception when try to request configuration from endpoint: %s", ex.getMessage()));
-            logger.warn(String.format("Exception when try to request configuration from endpoint: %s", ex.toString()));
+            appLogger.error(String.format("Exception when try to request configuration from Service: %s", ex.getMessage()));
+            logger.warn(String.format("Exception when try to request configuration from Service: %s", ex));
         } catch (Exception ex){
-            appLogger.error(String.format("Exception when try to request configuration from endpoint: %s", ex.getMessage()));
-            logger.warn(String.format("Exception when try to request configuration from endpoint: %s", ex.getMessage()), ex);
+            appLogger.error(String.format("Exception when try to request configuration from Service: %s", ex.getMessage()));
+            logger.warn(String.format("Exception when try to request configuration from Service: %s", ex.getMessage()), ex);
         }
         return response;
     }
 
-    private Json getJsonFromEndpoint(final String path) {
+    private Json getJsonFromService(final String path) {
         return RestClient.builder(this.serviceUri)
                 .header(Parameter.TOKEN, this.serviceToken)
                 .path(path)
                 .get();
     }
 
-    private Json postJsonFromEndpoint(final String path, final Json content) {
+    private Json postJsonFromService(final String path, final Json content) {
         return RestClient.builder(this.serviceUri)
                 .header(Parameter.TOKEN, this.serviceToken)
                 .path(path)
@@ -179,7 +178,7 @@ public class ProxyService extends Service {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Endpoint Web Services
+    // Service Web Services
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -212,65 +211,64 @@ public class ProxyService extends Service {
         });
         request.getParameters().forEachMapString(client::parameter);
 
-        final Json endpointResponse;
+        final Json serviceResponse;
         switch (request.getMethod()){
             case GET:
-                endpointResponse = client.get(true);
+            default:
+                serviceResponse = client.get(true);
                 break;
             case POST:
-                endpointResponse = client.post(body, true);
+                serviceResponse = client.post(body, true);
                 break;
             case PUT:
-                endpointResponse = client.put(body, true);
+                serviceResponse = client.put(body, true);
                 break;
             case DELETE:
-                endpointResponse = client.delete(true);
+                serviceResponse = client.delete(true);
                 break;
             case OPTIONS:
-                endpointResponse = client.options(true);
+                serviceResponse = client.options(true);
                 break;
             case HEAD:
-                endpointResponse = client.head(true);
+                serviceResponse = client.head(true);
                 break;
             case PATCH:
-                endpointResponse = client.patch(body, true);
+                serviceResponse = client.patch(body, true);
                 break;
-            default:
-                endpointResponse = client.get(true);
         }
 
         final WebServiceResponse response;
-        if(endpointResponse == null){
+        if(serviceResponse == null){
             response = new WebServiceResponse(String.format("Invalid response to [%s] method: no response", request.getMethod()));
             response.setHttpCode(500);
-        } else if(!endpointResponse.contains("body")){
-            response = new WebServiceResponse(String.format("Invalid response to [%s] method: %s", request.getMethod(), endpointResponse));
+        } else if(!serviceResponse.contains("body")){
+            response = new WebServiceResponse(String.format("Invalid response to [%s] method: %s", request.getMethod(), serviceResponse));
             response.setHttpCode(500);
         } else {
-            if(endpointResponse.object("body") instanceof LinkedHashMap
-                    && endpointResponse.contains("headers")
-                    && endpointResponse.json("headers")!= null
-                    && endpointResponse.json("headers").isNotEmpty()
-                    && endpointResponse.json("headers").string("Content-Type") != null
-                    && endpointResponse.json("headers").string("Content-Type").startsWith(ContentType.APPLICATION_JSON.getMimeType())
+            if(serviceResponse.object("body") instanceof LinkedHashMap
+                    && serviceResponse.contains("headers")
+                    && serviceResponse.json("headers")!= null
+                    && serviceResponse.json("headers").isNotEmpty()
+                    && serviceResponse.json("headers").string("Content-Type") != null
+                    && serviceResponse.json("headers").string("Content-Type").startsWith(ContentType.APPLICATION_JSON.getMimeType())
             ){
                 logger.info(String.format("Body response to [%s] method fixed to Json", request.getMethod()));
-                Json jsonBody = Json.fromMap((LinkedHashMap<String, ?>) endpointResponse.object("body"));
+                Json jsonBody = Json.fromMap((LinkedHashMap<String, ?>) serviceResponse.object("body"));
                 response = new WebServiceResponse(jsonBody);
             }else{
-                response = new WebServiceResponse(endpointResponse.object("body"));
+                response = new WebServiceResponse(serviceResponse.object("body"));
             }
 
-            if(endpointResponse.contains("status")){
+            if(serviceResponse.contains("status")){
                 try {
-                    response.setHttpCode(endpointResponse.integer("status"));
+                    response.setHttpCode(serviceResponse.integer("status"));
                 } catch (Exception ex){
-                    logger.warn(String.format("Exception on received status code [%s] - code 200 is returned: %s", endpointResponse.object("status"), ex.getMessage()), ex);
+                    logger.warn(String.format("Exception on received status code [%s] - code 200 is returned: %s", serviceResponse.object("status"), ex.getMessage()), ex);
                 }
             }
-            if(endpointResponse.contains("headers")){
+            if(serviceResponse.contains("headers")){
                 try {
-                    final Json hd = endpointResponse.json("headers");
+                    final Json hd = serviceResponse.json("headers");
                     if(hd != null && hd.isNotEmpty()){
                         for (String header : hd.keys()) {
                             if(!Parameter.CONTENT_LENGTH.equals(header) && !Parameter.HOST.equalsIgnoreCase(header)) {
@@ -279,7 +277,7 @@ public class ProxyService extends Service {
                         }
                     }
                 } catch (Exception ex){
-                    logger.warn(String.format("Exception on received headers [%s] - empty headers will be returned: %s", endpointResponse.object("headers"), ex.getMessage()), ex);
+                    logger.warn(String.format("Exception on received headers [%s] - empty headers will be returned: %s", serviceResponse.object("headers"), ex.getMessage()), ex);
                 }
             }
         }
@@ -288,11 +286,11 @@ public class ProxyService extends Service {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Endpoints Services API
+    // Services API
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @ServiceWebService(path = URL_CONFIGURATION, methods = RestMethod.GET)
-    public Json endpointServicesEndpointConfiguration(WebServiceRequest request){
+    public Json serviceConfiguration(WebServiceRequest request){
         logger.info("Properties request received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -303,7 +301,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_ASYNC_EVENT, methods = RestMethod.POST)
-    public Json endpointServicesEndpointAsyncEvent(WebServiceRequest request){
+    public Json serviceAsyncEvent(WebServiceRequest request){
         logger.info("Event received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -323,7 +321,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_SYNC_EVENT, methods = RestMethod.POST)
-    public Json endpointServicesEndpointSyncEvent(WebServiceRequest request){
+    public Json serviceSyncEvent(WebServiceRequest request){
         logger.info("Event received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -351,43 +349,13 @@ public class ProxyService extends Service {
             }
             return jsonResponse;
         } catch (Exception ex){
-            logger.warn(String.format("Exception when send sync event to application [%s]", ex.toString()));
+            logger.warn(String.format("Exception when send sync event to application [%s]", ex));
             return Json.map().set(Parameter.SYNC_ERROR_RESPONSE, ex.getMessage());
         }
     }
 
-//    @ServiceWebService(path = URL_CONFIG_SCRIPT, methods = RestMethod.POST)
-//    public Json endpointServicesEndpointConfigScripts(WebServiceRequest request){
-//        logger.info("Config script execution request received");
-//        checkToken(request.getHeader(Parameter.TOKEN));
-//
-//        final Json confScript = request.getJsonBody();
-//        try {
-//            Object response = scripts().execute(
-//                    confScript.longInteger(Parameter.DATE),
-//                    confScript.string(Parameter.CONFIG_SCRIPT_NAME),
-//                    confScript.object(Parameter.CONFIG_SCRIPT_PARAMS),
-//                    0
-//            );
-//            logger.info(String.format("Config script execution request sent to application [%s]", response != null ? response.toString() : "-"));
-//
-//            if (response == null) {
-//                response = Json.map();
-//            }
-//
-//            Json jsonResponse = Json.fromObject(response, false, true);
-//            if (jsonResponse == null) {
-//                jsonResponse = Json.map().set(Parameter.SYNC_RESPONSE, response);
-//            }
-//            return jsonResponse;
-//        } catch (Exception ex){
-//            logger.warn(String.format("Exception when send config script execution request to application [%s]", ex.toString()));
-//            return Json.map().set(Parameter.SYNC_ERROR_RESPONSE, ex.getMessage());
-//        }
-//    }
-
     @ServiceWebService(path = URL_APP_LOG, methods = RestMethod.POST)
-    public void endpointServicesEndpointAppLog(WebServiceRequest request){
+    public void serviceAppLog(WebServiceRequest request){
         logger.info("App log received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -403,7 +371,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_FILE_METADATA, methods = RestMethod.GET)
-    public Json endpointServicesEndpointFileMetadata(WebServiceRequest request){
+    public Json serviceFileMetadata(WebServiceRequest request){
         logger.info("File - get file metadata");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -415,7 +383,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_FILE_DOWNLOAD, methods = RestMethod.GET)
-    public InputStream endpointServicesEndpointDownloadFile(WebServiceRequest request){
+    public InputStream serviceDownloadFile(WebServiceRequest request){
         logger.info("File - download file from app");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -438,7 +406,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_FILE_UPLOAD, methods = RestMethod.POST)
-    public Json endpointServicesEndpointUploadFile(WebServiceRequest request){
+    public Json serviceUploadFile(WebServiceRequest request){
         logger.info("File - upload file to app");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -463,7 +431,7 @@ public class ProxyService extends Service {
             Object body = request.getBody();
             if(body instanceof String) {
                 try {
-                    fileIs = new ByteArrayInputStream(((String) body).getBytes(StandardCharsets.ISO_8859_1.name()));
+                    fileIs = new ByteArrayInputStream(((String) body).getBytes(StandardCharsets.ISO_8859_1));
                 } catch (Exception ex) {
                     logger.warn(String.format("Exception when try to parse the file as stream: %s", ex.getMessage()), ex);
                 }
@@ -495,7 +463,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_DATA_STORE, methods = RestMethod.POST)
-    public Json endpointServicesEndpointDataStoreSaveDocument(WebServiceRequest request){
+    public Json serviceDataStoreSaveDocument(WebServiceRequest request){
         logger.info("Data store - save received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -506,7 +474,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_DATA_STORE_BY_ID, methods = RestMethod.PUT)
-    public Json endpointServicesEndpointDataStoreUpdateDocument(WebServiceRequest request){
+    public Json serviceDataStoreUpdateDocument(WebServiceRequest request){
         logger.info("Data store - update received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -518,7 +486,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_DATA_STORE_COUNT, methods = RestMethod.GET)
-    public Json endpointServicesEndpointDataStoreCountDocuments(WebServiceRequest request){
+    public Json serviceDataStoreCountDocuments(WebServiceRequest request){
         logger.info("Data store - count");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -533,7 +501,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_DATA_STORE_BY_ID, methods = RestMethod.GET)
-    public Json endpointServicesEndpointDataStoreFindDocumentById(WebServiceRequest request){
+    public Json serviceDataStoreFindDocumentById(WebServiceRequest request){
         logger.info("Data store - find by id");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -544,7 +512,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_DATA_STORE, methods = RestMethod.GET)
-    public Json endpointServicesEndpointDataStoreFindDocuments(WebServiceRequest request){
+    public Json serviceDataStoreFindDocuments(WebServiceRequest request){
         logger.info("Data store - find");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -561,7 +529,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_DATA_STORE_BY_ID, methods = RestMethod.DELETE)
-    public Json endpointServicesEndpointDataStoreRemoveDocumentById(WebServiceRequest request){
+    public Json serviceDataStoreRemoveDocumentById(WebServiceRequest request){
         logger.info("Data store - remove");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -586,7 +554,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_DATA_STORE, methods = RestMethod.DELETE)
-    public Json endpointServicesEndpointDataStoreRemoveDocuments(WebServiceRequest request){
+    public Json serviceDataStoreRemoveDocuments(WebServiceRequest request){
         logger.info("Data store - remove all");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -606,7 +574,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_LOCK, methods = RestMethod.POST)
-    public Json endpointServicesEndpointLockEndpointKey(WebServiceRequest request){
+    public Json serviceLockKey(WebServiceRequest request){
         logger.info("Lock key request received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -618,7 +586,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_LOCK, methods = RestMethod.DELETE)
-    public Json endpointServicesEndpointUnlockEndpointKey(WebServiceRequest request){
+    public Json serviceUnlockKey(WebServiceRequest request){
         logger.info("Unlock key request received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -630,7 +598,7 @@ public class ProxyService extends Service {
     }
 
     @ServiceWebService(path = URL_CLEAR_CACHE, methods = RestMethod.PUT)
-    public Json endpointServicesClearCache(WebServiceRequest request){
+    public Json serviceClearCache(WebServiceRequest request){
         logger.info("Clear cache");
         checkToken(request.getHeader(Parameter.TOKEN));
 
@@ -646,7 +614,7 @@ public class ProxyService extends Service {
     /** Check the token of the request */
     private void checkToken(String token){
         if(StringUtils.isNotBlank(serviceToken) && !serviceToken.equals(token)){
-            throw ServiceException.permanent(ErrorCode.API, "Invalid endpoint services token (check proxy configuration page)");
+            throw ServiceException.permanent(ErrorCode.API, "Invalid Service services token (check proxy configuration page)");
         }
     }
 

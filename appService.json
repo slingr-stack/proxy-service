@@ -60,7 +60,7 @@
             "typeOptions": {
                 "alertType": "info"
             },
-            "defaultGenerator": "'<br>_service_name='+config.SERVICE_NAME+'<br>_app_name='+config.APP+'<br>_environment='+config.ENV+'<br>_pod_id=id<br>_profile=default<br>_custom_domain=<br>_debug=true<br>_local_deployment=true<br>_base_domain='+config.SERVER_NAME+'<br>_webservices_port=10000<br>_services_services_api='+config.WEBHOOK_URL+'/api<br>_token='+config.serviceToken+'<br>_service_config={}<br>&nbsp;'"
+            "defaultGenerator": "'<br>_service_name='+config.SERVICE_NAME+'<br>_app_name='+config.APP+'<br>_environment='+config.ENV+'<br>_pod_id=id<br>_profile=default<br>_custom_domain=<br>_debug=true<br>_local_deployment=true<br>_base_domain='+config.SERVER_NAME+'<br>_webservices_port=10000<br>_extension_broker_api='+config.WEBHOOK_URL+'/api<br>_token='+config.serviceToken+'<br>_service_config={}<br>&nbsp;'"
         }
     ]
 }
