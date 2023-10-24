@@ -24,7 +24,7 @@
         <!-- SLINGR Service Framework -->
         <!--suppress VulnerableLibrariesLocal -->
         <dependency>
-            <groupId>io.slingr.services</groupId>
+            <groupId>io.github.slingr-stack</groupId>
             <artifactId>slingr-services</artifactId>
             <version>${slingr.slingr-service.version}</version>
         </dependency>
@@ -58,7 +58,23 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>clojars</id>
+            <name>Clojars repository</name>
+            <url>https://clojars.org/repo</url>
+        </repository>
     </repositories>
+    <distributionManagement>
+        <repository>
+            <id>slingrRepo.write.release</id>
+            <url>gs://repo.slingrs.io/release</url>
+        </repository>
+        <snapshotRepository>
+            <id>clojars</id>
+            <name>Clojars repository</name>
+            <url>https://clojars.org/repo</url>
+        </snapshotRepository>
+    </distributionManagement>
     <build>
         <plugins>
             <plugin>
