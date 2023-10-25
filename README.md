@@ -35,8 +35,17 @@ to know where this has to be copied.
 
 ## Javascript API
 
-The Javascript API will be defined by your service's functions and scripts. Please see
-[Service features]({{site.baseurl}}/extensions_common_features.html) to understand what can be done.
+In this scenario, the http-service is employed as an external service. To access the API, you will need to substitute the service namespace to be tested from svc.http tothe proxy svc.proxy, as illustrated.
+
+```js
+var res = svc.proxy.get({
+  url: 'https://postman-echo.com/get',
+  params: {
+    foo1: '1'
+  }
+});
+log('Response: '+ JSON.stringify(res));
+```
 
 ## Events
 
