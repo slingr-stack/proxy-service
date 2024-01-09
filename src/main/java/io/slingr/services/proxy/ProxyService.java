@@ -38,10 +38,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Service used as proxy to services on the developer environment
- *
+ * Service used as a proxy to services on the developer environment
+ * <p>
  * Created by agreggio on 23/10/23.
  */
+@SuppressWarnings("unchecked")
 @SlingrService(name = "proxy")
 public class ProxyService extends Service {
     private static final Logger logger = LoggerFactory.getLogger(ProxyService.class);
@@ -56,18 +57,19 @@ public class ProxyService extends Service {
     private static final String VAR_DATA_STORE = "dataStore";
     private static final String VAR_DOCUMENT_ID = "documentId";
     private static final String VAR_FILE_ID = "fileId";
-    private static final String URL_CONFIGURATION =     ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_CONFIGURATION;
-    private static final String URL_ASYNC_EVENT =       ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_ASYNC_EVENT;
-    private static final String URL_SYNC_EVENT =        ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SYNC_EVENT;
-    private static final String URL_APP_LOG =           ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_APP_LOG;
-    private static final String URL_FILE_UPLOAD =       ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_FILE_UPLOAD;
-    private static final String URL_LOCK =              ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SERVICES_PREFIX+ApiUri.ES_PART_LOCK+"/{"+VAR_KEY+"}";
-    private static final String URL_FILE_DOWNLOAD =     ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SERVICES_PREFIX+ApiUri.ES_PART_FILE+"/{"+VAR_FILE_ID+"}";
-    private static final String URL_FILE_METADATA =     ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SERVICES_PREFIX+ApiUri.ES_PART_FILE+"/{"+VAR_FILE_ID+"}/"+ApiUri.ES_PART_METADATA;
-    private static final String URL_DATA_STORE =        ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SERVICES_PREFIX+ApiUri.ES_PART_DATA_STORE+"/{"+VAR_DATA_STORE+"}";
-    private static final String URL_DATA_STORE_BY_ID =  ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SERVICES_PREFIX+ApiUri.ES_PART_DATA_STORE+"/{"+VAR_DATA_STORE+"}/{"+VAR_DOCUMENT_ID+"}";
-    private static final String URL_DATA_STORE_COUNT =  ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_SERVICES_PREFIX+ApiUri.ES_PART_DATA_STORE+"/{"+VAR_DATA_STORE+"}/"+ApiUri.ES_PART_COUNT;
-    private static final String URL_CLEAR_CACHE =       ApiUri.ES_URL_PREFIX+ApiUri.ES_URL_CLEAR_CACHE;
+    private static final String EB_URL_PREFIX = "/api";
+    private static final String URL_CONFIGURATION =     EB_URL_PREFIX + ApiUri.URL_CONFIGURATION;
+    private static final String URL_ASYNC_EVENT =       EB_URL_PREFIX + ApiUri.EB_URL_ASYNC_EVENT;
+    private static final String URL_SYNC_EVENT =        EB_URL_PREFIX + ApiUri.EB_URL_SYNC_EVENT;
+    private static final String URL_APP_LOG =           EB_URL_PREFIX + ApiUri.EB_URL_APP_LOG;
+    private static final String URL_FILE_UPLOAD =       EB_URL_PREFIX + ApiUri.EB_URL_FILE_UPLOAD;
+    private static final String URL_LOCK =              EB_URL_PREFIX + ApiUri.EB_URL_SERVICES_PREFIX+ApiUri.EB_PART_LOCK+"/{"+VAR_KEY+"}";
+    private static final String URL_FILE_DOWNLOAD =     EB_URL_PREFIX + ApiUri.EB_URL_SERVICES_PREFIX+ApiUri.EB_PART_FILE+"/{"+VAR_FILE_ID+"}";
+    private static final String URL_FILE_METADATA =     EB_URL_PREFIX + ApiUri.EB_URL_SERVICES_PREFIX+ApiUri.EB_PART_FILE+"/{"+VAR_FILE_ID+"}/"+ApiUri.EB_PART_METADATA;
+    private static final String URL_DATA_STORE =        EB_URL_PREFIX + ApiUri.EB_URL_SERVICES_PREFIX+ApiUri.EB_PART_DATA_STORE+"/{"+VAR_DATA_STORE+"}";
+    private static final String URL_DATA_STORE_BY_ID =  EB_URL_PREFIX + ApiUri.EB_URL_SERVICES_PREFIX+ApiUri.EB_PART_DATA_STORE+"/{"+VAR_DATA_STORE+"}/{"+VAR_DOCUMENT_ID+"}";
+    private static final String URL_DATA_STORE_COUNT =  EB_URL_PREFIX + ApiUri.EB_URL_SERVICES_PREFIX+ApiUri.EB_PART_DATA_STORE+"/{"+VAR_DATA_STORE+"}/"+ApiUri.EB_PART_COUNT;
+    private static final String URL_CLEAR_CACHE =       EB_URL_PREFIX + ApiUri.EB_URL_CLEAR_CACHE;
 
     @ApplicationLogger
     private AppLogs appLogger;
@@ -94,10 +96,6 @@ public class ProxyService extends Service {
         logger.info(String.format("Configured Proxy Service - Service URI [%s], Service Token [%s]", serviceUri, Strings.maskToken(serviceToken)));
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Services API
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
     @Override
     public Object functionInterceptor(FunctionRequest request) throws ServiceException {
         final String functionName = request.getFunctionName();
@@ -112,7 +110,7 @@ public class ProxyService extends Service {
             }
             jsonRequest.set(Parameter.PARAMS, body);
 
-            final Json response = postJsonFromService(ApiUri.URL_FUNCTION, jsonRequest);
+            final Json response = postJsonFromService(jsonRequest);
 
             logger.info(String.format("Function response [%s] received - id [%s]", functionName, request.getFunctionId()));
             return response.contains(Parameter.DATA) ? response.json(Parameter.DATA) : Json.map();
@@ -127,10 +125,9 @@ public class ProxyService extends Service {
 
     @Override
     public Json configurationInterceptor(Json configuration) throws ServiceException {
-        Json response = configuration;
         try {
             // removes proxy configuration
-            response.set(Parameter.METADATA_HELP_URL, CONFIGURATION_HELP_URL_VALUE)
+            configuration.set(Parameter.METADATA_HELP_URL, CONFIGURATION_HELP_URL_VALUE)
                     .remove(Parameter.METADATA_PER_USER)
                     .remove(Parameter.METADATA_CONFIGURATION)
                     .remove(Parameter.METADATA_FUNCTIONS)
@@ -141,10 +138,10 @@ public class ProxyService extends Service {
                     .remove(Parameter.METADATA_LISTENERS);
 
             // get configuration from the external Service
-            final Json serviceConfiguration = getJsonFromService(ApiUri.URL_CONFIGURATION);
+            final Json serviceConfiguration = getJsonFromService();
             if(serviceConfiguration != null) {
                 logger.info("Properties received from Service");
-                response.set(Parameter.METADATA_PER_USER, serviceConfiguration.is(Parameter.METADATA_PER_USER, false))
+                configuration.set(Parameter.METADATA_PER_USER, serviceConfiguration.is(Parameter.METADATA_PER_USER, false))
                         .setIfNotNull(Parameter.METADATA_CONFIGURATION, serviceConfiguration.json(Parameter.METADATA_CONFIGURATION))
                         .setIfNotNull(Parameter.METADATA_FUNCTIONS, serviceConfiguration.jsons(Parameter.METADATA_FUNCTIONS))
                         .setIfNotNull(Parameter.METADATA_EVENTS, serviceConfiguration.jsons(Parameter.METADATA_EVENTS))
@@ -160,26 +157,22 @@ public class ProxyService extends Service {
             appLogger.error(String.format("Exception when try to request configuration from Service: %s", ex.getMessage()));
             logger.warn(String.format("Exception when try to request configuration from Service: %s", ex.getMessage()), ex);
         }
-        return response;
+        return configuration;
     }
 
-    private Json getJsonFromService(final String path) {
+    private Json getJsonFromService() {
         return RestClient.builder(this.serviceUri)
                 .header(Parameter.TOKEN, this.serviceToken)
-                .path(path)
+                .path(ApiUri.URL_CONFIGURATION)
                 .get();
     }
 
-    private Json postJsonFromService(final String path, final Json content) {
+    private Json postJsonFromService(final Json content) {
         return RestClient.builder(this.serviceUri)
                 .header(Parameter.TOKEN, this.serviceToken)
-                .path(path)
+                .path(ApiUri.URL_FUNCTION)
                 .post(content);
     }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Service Web Services
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public Object webServicesInterceptor(WebServiceRequest request) throws ServiceException {
@@ -211,31 +204,15 @@ public class ProxyService extends Service {
         });
         request.getParameters().forEachMapString(client::parameter);
 
-        final Json serviceResponse;
-        switch (request.getMethod()){
-            case GET:
-            default:
-                serviceResponse = client.get(true);
-                break;
-            case POST:
-                serviceResponse = client.post(body, true);
-                break;
-            case PUT:
-                serviceResponse = client.put(body, true);
-                break;
-            case DELETE:
-                serviceResponse = client.delete(true);
-                break;
-            case OPTIONS:
-                serviceResponse = client.options(true);
-                break;
-            case HEAD:
-                serviceResponse = client.head(true);
-                break;
-            case PATCH:
-                serviceResponse = client.patch(body, true);
-                break;
-        }
+        final Json serviceResponse = switch (request.getMethod()) {
+            default -> client.get(true);
+            case POST -> client.post(body, true);
+            case PUT -> client.put(body, true);
+            case DELETE -> client.delete(true);
+            case OPTIONS -> client.options(true);
+            case HEAD -> client.head(true);
+            case PATCH -> client.patch(body, true);
+        };
 
         final WebServiceResponse response;
         if(serviceResponse == null){
@@ -284,10 +261,6 @@ public class ProxyService extends Service {
 
         return response;
     }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Services API
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @ServiceWebService(path = URL_CONFIGURATION, methods = RestMethod.GET)
     public Json serviceConfiguration(WebServiceRequest request){
