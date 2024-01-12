@@ -44,8 +44,8 @@ import java.util.Map;
  */
 @SuppressWarnings("unchecked")
 @SlingrService(name = "proxy")
-public class ProxyService extends Service {
-    private static final Logger logger = LoggerFactory.getLogger(ProxyService.class);
+public class Proxy extends Service {
+    private static final Logger logger = LoggerFactory.getLogger(Proxy.class);
 
     private static final String DATA_STORE_NAME = "__ds_name__";
     private static final String DATA_STORE_NEW_ID = "__ds_id__";
