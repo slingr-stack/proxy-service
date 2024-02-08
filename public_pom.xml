@@ -8,8 +8,8 @@
     </parent>
     <artifactId>proxy</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>SLINGR - Dev Services Proxy</name>
-    <description>Default component to manage a connection from your locañ to a Slingr service of the Slingr platform</description>
+    <name>SLINGR - Proxy service</name>
+    <description>Default component to manage a connection from your local to a Slingr service of the Slingr platform</description>
     <packaging>jar</packaging>
     <properties>
         <!-- Slingr versions -->
