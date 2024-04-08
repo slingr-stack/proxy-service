@@ -23,43 +23,7 @@
         {"name": "ds"}
     ],
     "events": [],
-    "functions": [
-        {
-            "label": "GET",
-            "name": "get",
-            "description": "Sends a GET request"
-        },
-        {
-            "label": "POST",
-            "name": "post",
-            "description": "Sends a POST request"
-        },
-        {
-            "label": "PUT",
-            "name": "put",
-            "description": "Sends a PUT request"
-        },
-        {
-            "label": "PATCH",
-            "name": "patch",
-            "description": "Sends a PATCH request"
-        },
-        {
-            "label": "DELETE",
-            "name": "delete",
-            "description": "Sends a DELETE request"
-        },
-        {
-            "label": "HEAD",
-            "name": "head",
-            "description": "Sends a HEAD request"
-        },
-        {
-            "label": "OPTIONS",
-            "name": "options",
-            "description": "Sends a OPTIONS request"
-        }
-    ],
+    "functions": [],
     "scripts":[],
     "configuration":[
         {
