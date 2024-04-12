@@ -58,7 +58,7 @@ public class Proxy extends Service {
     private static final String VAR_DOCUMENT_ID = "documentId";
     private static final String VAR_FILE_ID = "fileId";
     private static final String EB_URL_PREFIX = "/api";
-    private static final String URL_CONFIGURATION =     EB_URL_PREFIX + ApiUri.URL_CONFIGURATION;
+    private static final String URL_CONFIGURATION =     EB_URL_PREFIX + ApiUri.EB_URL_CONFIGURATION;
     private static final String URL_ASYNC_EVENT =       EB_URL_PREFIX + ApiUri.EB_URL_ASYNC_EVENT;
     private static final String URL_SYNC_EVENT =        EB_URL_PREFIX + ApiUri.EB_URL_SYNC_EVENT;
     private static final String URL_APP_LOG =           EB_URL_PREFIX + ApiUri.EB_URL_APP_LOG;
