@@ -42,7 +42,6 @@ import java.util.Map;
  * <p>
  * Created by agreggio on 23/10/23.
  */
-@SuppressWarnings("unchecked")
 @SlingrService(name = "proxy")
 public class Proxy extends Service {
     private static final Logger logger = LoggerFactory.getLogger(Proxy.class);
@@ -360,7 +359,7 @@ public class Proxy extends Service {
         logger.info("File - download file from app");
         checkToken(request.getHeader(Parameter.TOKEN));
 
-        final String fileId = request.getPathVariable(VAR_FILE_ID);
+        final String fileId = request.getPathVariableByPattern(URL_FILE_DOWNLOAD, VAR_FILE_ID);
 
         final DownloadedFile file = files().download(fileId);
         if(file != null && file.getFile() != null) {
@@ -489,7 +488,7 @@ public class Proxy extends Service {
         logger.info("Data store - find");
         checkToken(request.getHeader(Parameter.TOKEN));
 
-        final String dataStoreName = request.getPathVariable(VAR_DATA_STORE);
+        final String dataStoreName = request.getPathVariableByPattern(URL_DATA_STORE, VAR_DATA_STORE);
         final Json parameters = request.getParameters();
 
         final DataStoreResponse response = internalDataStoreFindDocuments(dataStoreName, parameters);
@@ -531,7 +530,7 @@ public class Proxy extends Service {
         logger.info("Data store - remove all");
         checkToken(request.getHeader(Parameter.TOKEN));
 
-        final String dataStoreName = request.getPathVariable(VAR_DATA_STORE);
+        final String dataStoreName = request.getPathVariableByPattern(URL_DATA_STORE, VAR_DATA_STORE);
         boolean removed = false;
         if(StringUtils.isNotBlank(dataStoreName)) {
             final Json parameters = request.getParameters();
@@ -551,7 +550,7 @@ public class Proxy extends Service {
         logger.info("Lock key request received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
-        final String key = request.getPathVariable(VAR_KEY);
+        final String key = request.getPathVariableByPattern(URL_LOCK, VAR_KEY);
         boolean acquired = locks().lock(key);
         logger.info(String.format("Lock acquired [%s]: %s", key, acquired));
 
@@ -563,7 +562,7 @@ public class Proxy extends Service {
         logger.info("Unlock key request received");
         checkToken(request.getHeader(Parameter.TOKEN));
 
-        final String key = request.getPathVariable(VAR_KEY);
+        final String key = request.getPathVariableByPattern(URL_LOCK, VAR_KEY);
         boolean lockReleased = locks().unlock(key);
         logger.info(String.format("Lock released [%s]: %s", key, lockReleased));
 
