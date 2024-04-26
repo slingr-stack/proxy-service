@@ -488,7 +488,7 @@ public class Proxy extends Service {
         logger.info("Data store - find");
         checkToken(request.getHeader(Parameter.TOKEN));
 
-        final String dataStoreName = request.getPathVariableByPattern(URL_DATA_STORE, VAR_DATA_STORE);
+        final String dataStoreName = request.getPathVariable(VAR_DATA_STORE);
         final Json parameters = request.getParameters();
 
         final DataStoreResponse response = internalDataStoreFindDocuments(dataStoreName, parameters);
@@ -530,7 +530,7 @@ public class Proxy extends Service {
         logger.info("Data store - remove all");
         checkToken(request.getHeader(Parameter.TOKEN));
 
-        final String dataStoreName = request.getPathVariableByPattern(URL_DATA_STORE, VAR_DATA_STORE);
+        final String dataStoreName = request.getPathVariable(VAR_DATA_STORE);
         boolean removed = false;
         if(StringUtils.isNotBlank(dataStoreName)) {
             final Json parameters = request.getParameters();
