@@ -579,10 +579,6 @@ public class Proxy extends Service {
         return Json.map();
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Helpers
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
     /** Check the token of the request */
     private void checkToken(String token){
         if(StringUtils.isNotBlank(serviceToken) && !serviceToken.equals(token)){
