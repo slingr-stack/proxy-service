@@ -2,7 +2,6 @@
     "label": "Proxy Service",
     "name": "proxy",
     "apiVersion": "v1",
-    "internal": false,
     "proxy": true,
     "configurationType": "GLOBAL",
     "deployment": {
@@ -20,11 +19,12 @@
     "configurationHelpUrl": "/services_proxy.html#configuration",
     "status": "ACTIVE",
     "stores": [
-        {"name": "ds"}
+        {
+            "name": "ds"
+        }
     ],
     "events": [],
     "functions": [],
-    "scripts":[],
     "configuration":[
         {
             "name": "serviceUri",
