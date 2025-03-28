@@ -21,6 +21,6 @@
   <properties>
     <build.main-class>io.slingr.services.proxy.Runner</build.main-class>
     <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
-    <slingr.slingr-service.version>1.5.1</slingr.slingr-service.version>
+    <slingr.slingr-service.version>1.6.5</slingr.slingr-service.version>
   </properties>
 </project>

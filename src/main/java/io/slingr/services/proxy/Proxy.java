@@ -185,8 +185,7 @@ public class Proxy extends Service {
         }
         path = path.trim();
 
-        final String queryString = Strings.convertToQueryString(request.getParameters());
-
+        final String queryString = request.getParameters().toString();
         final Object body = request.getBody();
         final String bodyLog = request.getMethod() == RestMethod.POST || request.getMethod() == RestMethod.PUT || request.getMethod() == RestMethod.PATCH ?
                 String.format(" - body [%s]", body != null ? body : "-") : "";
@@ -334,10 +333,10 @@ public class Proxy extends Service {
         final Json appLog = request.getJsonBody();
 
         appLogs().sendAppLog(
-                appLog.longInteger(Parameter.DATE),
-                AppLogLevel.fromString(appLog.string(Parameter.APP_LOG_LEVEL)),
-                appLog.string(Parameter.APP_LOG_MESSAGE),
-                appLog.json(Parameter.APP_LOG_ADDITIONAL_INFO)
+                AppLogLevel.fromString(Parameter.DATE.toString()),
+                appLog.string(Parameter.APP_LOG_LEVEL),
+                appLog.json(Parameter.APP_LOG_MESSAGE),
+                null
         );
         logger.info("App log sent to application");
     }
@@ -362,8 +361,8 @@ public class Proxy extends Service {
         final String fileId = request.getPathVariableByPattern(URL_FILE_DOWNLOAD, VAR_FILE_ID);
 
         final DownloadedFile file = files().download(fileId);
-        if(file != null && file.getFile() != null) {
-            final File tmp = FilesUtils.copyInputStreamToTemporaryFile(fileId, file.getFile(), true);
+        if(file != null && file.file() != null) {
+            final File tmp = FilesUtils.copyInputStreamToTemporaryFile(fileId, file.file(), true);
             if(tmp.exists()){
                 try{
                     logger.info("File - input stream sent");
@@ -387,14 +386,14 @@ public class Proxy extends Service {
         String fileContentType = null;
 
         for (UploadedFile file : request.getFiles()) {
-            if(file.getName().equals(Parameter.FILE_UPLOAD_PARAMETER)){
-                fileIs = file.getFile();
-                fileName = file.getFilename();
+            if(file.name().equals(Parameter.FILE_UPLOAD_PARAMETER)){
+                fileIs = file.file();
+                fileName = file.filename();
 
-                if(StringUtils.isNotBlank(file.getContentType())){
-                    fileContentType = file.getContentType();
+                if(StringUtils.isNotBlank(file.contentType())){
+                    fileContentType = file.contentType();
                 } else {
-                    fileContentType = file.getHeaders().string(Parameter.CONTENT_TYPE.toLowerCase());
+                    fileContentType = file.headers().string(Parameter.CONTENT_TYPE.toLowerCase());
                 }
             }
         }
@@ -467,9 +466,9 @@ public class Proxy extends Service {
 
         final DataStoreResponse response = internalDataStoreFindDocuments(dataStoreName, parameters);
 
-        logger.info(String.format("Data store - count [%s]", response.getItems().size()));
+        logger.info(String.format("Data store - count [%s]", response.items().size()));
         return Json.map()
-                .set(Parameter.DATA_STORE_TOTAL, response.getItems().size());
+                .set(Parameter.DATA_STORE_TOTAL, response.items().size());
     }
 
     @ServiceWebService(path = URL_DATA_STORE_BY_ID, methods = RestMethod.GET)
@@ -493,11 +492,11 @@ public class Proxy extends Service {
 
         final DataStoreResponse response = internalDataStoreFindDocuments(dataStoreName, parameters);
 
-        logger.info(String.format("Data store - found [%s]", response.getItems().size()));
+        logger.info(String.format("Data store - found [%s]", response.items().size()));
         return Json.map()
-                .set(Parameter.DATA_STORE_ITEMS, response.getItems())
-                .set(Parameter.DATA_STORE_TOTAL, response.getTotal())
-                .set(Parameter.PAGINATION_OFFSET, response.getOffset());
+                .set(Parameter.DATA_STORE_ITEMS, response.items())
+                .set(Parameter.DATA_STORE_TOTAL, response.total())
+                .set(Parameter.PAGINATION_OFFSET, response.offset());
     }
 
     @ServiceWebService(path = URL_DATA_STORE_BY_ID, methods = RestMethod.DELETE)
@@ -514,7 +513,8 @@ public class Proxy extends Service {
             if(oldDocument != null && !oldDocument.isEmpty()){
                 final String oldId = oldDocument.string(DATA_STORE_ID);
                 if(StringUtils.isNotBlank(oldId)){
-                    removed = dataStore.removeById(oldId);
+                    dataStore.removeById(oldId);
+                    removed = true;
                 }
             }
         }
@@ -637,14 +637,14 @@ public class Proxy extends Service {
         final Json filter = internalDataStoreFilter(dataStoreName, parameters);
 
         final DataStoreResponse response = dataStore.find(filter);
-        final List<Json> items = response.getItems();
+        final List<Json> items = response.items();
         items.forEach(document -> document
                 .set(DATA_STORE_ID, document.string(DATA_STORE_NEW_ID))
                 .remove(DATA_STORE_NEW_ID)
                 .remove(DATA_STORE_NAME)
         );
 
-        return new DataStoreResponse(items, response.getTotal(), response.getOffset());
+        return new DataStoreResponse(items, response.total(), response.offset());
     }
 
     private Json internalDataStoreFindDocumentById(String dataStoreName, String documentId, boolean convert){
@@ -656,7 +656,7 @@ public class Proxy extends Service {
                 .set(DATA_STORE_NEW_ID, documentId);
 
         final DataStoreResponse response = dataStore.find(filter);
-        final List<Json> items = response.getItems();
+        final List<Json> items = response.items();
 
         Json result = items.isEmpty() ? null : items.get(0);
         if(result == null){
