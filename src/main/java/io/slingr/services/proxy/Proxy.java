@@ -333,9 +333,9 @@ public class Proxy extends Service {
         final Json appLog = request.getJsonBody();
 
         appLogs().sendAppLog(
-                AppLogLevel.fromString(Parameter.DATE.toString()),
-                appLog.string(Parameter.APP_LOG_LEVEL),
-                appLog.json(Parameter.APP_LOG_MESSAGE),
+                AppLogLevel.fromString(Parameter.APP_LOG_LEVEL),
+                appLog.string(Parameter.APP_LOG_MESSAGE),
+                null,
                 null
         );
         logger.info("App log sent to application");
